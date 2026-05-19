@@ -49,25 +49,36 @@ def move_generator(state):
     moves = []
     direction = 1 if state.current_player == 'B' else -1  # B moves down, W moves up
     for r in range(rows):
+        opponent = 'W' if state.current_player == 'B' else 'B'
         for c in range(cols):
             if state.board[r][c] == state.current_player:
                 # Check possible moves for this piece
                 current_moves = []
-                opponent = 'W' if state.current_player == 'B' else 'B'
-                    # B moves downwards
-                if r + direction < rows and state.board[r + direction][c] == '_':
-                        current_moves.append((r, c, r + direction, c))  
-                if r + direction < rows and c - 1 >= 0 and (state.board[r + direction][c - 1] == '_' or state.board[r + direction][c - 1] == opponent):
-                        current_moves.append((r, c, r + direction, c - 1))
-                if r + direction < rows and c + 1 < cols and (state.board[r + direction][c + 1] == '_' or state.board[r + direction][c + 1] == opponent):
-                        current_moves.append((r, c, r + direction, c + 1))
-                    # W moves upwards
-                pass
+                new_r = r + direction
+                if 0 <= new_r < rows:
+                    if state.board[new_r][c] == '_':
+                            current_moves.append((r, c, new_r, c))  
+                    if c - 1 >= 0 and (state.board[new_r][c - 1] == '_' or state.board[new_r][c - 1] == opponent):
+                            current_moves.append((r, c, new_r, c - 1))
+                    if c + 1 < cols and (state.board[new_r][c + 1] == '_' or state.board[new_r][c + 1] == opponent):
+                            current_moves.append((r, c, new_r, c + 1))
                 moves.extend(current_moves)
     return moves
 
+def apply_move(state, move):
+    # move is a tuple (from_row, from_col, to_row, to_col)
+    from_row, from_col, to_row, to_col = move
+    new_state = state.copy()
+    piece = new_state.board[from_row][from_col]
+    new_state.board[to_row][to_col] = piece
+    new_state.board[from_row][from_col] = '_'
+    # Switch player
+    new_state.current_player = 'W' if state.current_player == 'B' else 'B'
+    return new_state
+
 state = GameState(make_default_board(), 'B')
 moves = move_generator(state)
+state = apply_move(state, moves[19])  # Apply the first move for testing
 print("Possible moves for player B:")
 for move in moves:
     print(move)
